@@ -1,0 +1,200 @@
+/*
+ * build.gradle
+ * XNAT http://www.xnat.org
+ * Copyright (c) 2016, Washington University School of Medicine
+ * All Rights Reserved
+ *
+ * Released under the Simplified BSD.
+ */
+
+def pluginVersion = '1.0.0-eventservice'
+def vXnat = '1.7.5-SNAPSHOT'
+def vXnatDev = '1.7.5-RC1-SNAPSHOT'
+def vXnatXXX = 'X.X.X-eventservice-SNAPSHOT'
+def vJunit = '4.12'
+
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'groovy'
+apply plugin: 'java'
+apply plugin: 'jacoco'
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+apply plugin: 'idea'
+apply plugin: "io.franzbecker.gradle-lombok"
+apply plugin: 'eclipse'
+apply plugin: 'xnat-data-builder'
+
+buildscript {
+    repositories {
+        mavenLocal()
+        jcenter()
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+        maven {
+            url 'https://nrgxnat.jfrog.io/nrgxnat/libs-release'
+            name 'XNAT Release Repository'
+        }
+        maven {
+            url 'https://nrgxnat.jfrog.io/nrgxnat/libs-snapshot'
+            name 'XNAT Snapshot Repository'
+        }
+    }
+    dependencies {
+        classpath "org.hibernate:hibernate-validator:6.0.3.Final"
+        classpath "io.franzbecker:gradle-lombok:1.11"
+        classpath "io.spring.gradle:dependency-management-plugin:1.0.3.RELEASE"
+        classpath "org.apache.maven.plugins:maven-resources-plugin:2.5"
+        classpath "org.apache.maven.plugins:maven-compiler-plugin:3.7.0"
+        classpath "org.apache.maven.plugins:maven-surefire-plugin:2.20.1"
+        classpath "org.apache.maven.plugins:maven-antrun-plugin:1.8"
+        classpath "org.apache.maven.plugins:maven-jar-plugin:3.0.2"
+        classpath "javax.validation:validation-api:2.0.0.Final"
+        classpath "org.nrg.xdat:core:X.X.X-eventservice-SNAPSHOT"
+        classpath "org.nrg:framework:X.X.X-eventservice-SNAPSHOT"
+        classpath ("org.nrg.xnat.build:xnat-data-builder:1.7.5-SNAPSHOT"){
+            exclude group:'torque'
+        }
+    }
+}
+
+group 'org.nrg.xnat'
+version pluginVersion
+
+
+repositories {
+    mavenLocal()
+    maven {
+        url "http://maven.imagej.net/content/groups/public"
+        name "ImageJ Maven Repository"
+    }
+    jcenter()
+    mavenCentral()
+    maven {
+        url 'https://nrgxnat.jfrog.io/nrgxnat/libs-release'
+        name 'XNAT Release Repository'
+    }
+    maven {
+        url 'https://nrgxnat.jfrog.io/nrgxnat/libs-snapshot'
+        name 'XNAT Snapshot Repository'
+    }
+    maven {
+        url 'https://nrgxnat.jfrog.io/nrgxnat/ext-release'
+        name 'XNAT External Release Repository'
+    }
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+
+compileJava {
+    options.fork = false
+}
+
+jacoco {
+    toolVersion = "0.7.9"
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.enabled = false
+        csv.enabled = false
+        html.destination file("${buildDir}/jacocoHtml")
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/main/java'
+            srcDir 'build/xnat-generated/src/main/java'
+        }
+        resources {
+            srcDir 'src/main/resources'
+            srcDir 'build/xnat-generated/src/main/resources'
+        }
+    }
+}
+
+configurations {
+    all*.exclude group: 'edu.ucar', module: 'netcdf'
+    all*.exclude group: 'jakarta-regexp'
+    all*.exclude group: 'net.sf.saxon', module: 'Saxon-B'
+    all*.exclude group: 'org.apache.geronimo.specs'
+    all*.exclude module: 'pipelineCNDAXNAT'
+    all*.exclude group: 'jamon'
+    compile.extendsFrom(compileAndInclude)
+}
+
+dependencyManagement.imports {
+    mavenBom "org.nrg:parent:${vXnatXXX}"
+}
+
+dependencies {
+    implementation 'javax.servlet:servlet-api:2.4'
+    implementation 'geronimo-spec:geronimo-spec-jms:1.1-rc4'
+    implementation 'velocity:velocity:1.5'
+    implementation 'org.hibernate:hibernate-core:4.3.11.Final'
+    implementation 'com.google.guava:guava:20.0'
+    implementation 'commons-lang:commons-lang:2.6'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.6.5'
+    implementation 'org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.Final'
+    implementation 'javax.jms:javax.jms-api:2.0.1'
+    implementation 'javax.inject:javax.inject:1'
+    implementation 'org.restlet:org.restlet:1.1.10'
+    implementation 'org.sonatype.sisu:sisu-inject-bean:1.4.2'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.6.5'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.6.5'
+    implementation 'org.nrg:mail:1.7.5-SNAPSHOT'
+    implementation "org.nrg.xnat:web:X.X.X-eventservice-SNAPSHOT"
+    implementation "javax.validation:validation-api:2.0.0.Final"
+    implementation "org.nrg:dicomtools"
+    implementation "org.nrg:dicom-xnat"
+    implementation "org.nrg:dicom-xnat-util"
+    implementation "org.nrg.dicom:dicom-edit4"
+    runtime 'org.nrg.dicom:dicom-edit6'
+    implementation "org.nrg.xnat:xnat-data-models"
+    implementation "org.nrg.xdat:core:X.X.X-eventservice-SNAPSHOT"
+    implementation "org.nrg:framework"
+    implementation "org.nrg:config"
+    implementation "javax.servlet:javax.servlet-api"
+    runtime 'org.apache.xmlbeans:xmlbeans-xpath'
+    implementation "turbine:turbine"
+    implementation "org.apache.velocity:velocity"
+    implementation "log4j:log4j"
+    implementation "org.springframework:spring-beans"
+    implementation "org.springframework:spring-context"
+    implementation "org.springframework:spring-jms"
+    implementation "org.springframework:spring-tx"
+    runtime 'org.springframework:spring-web'
+    runtime 'io.springfox:springfox-swagger-ui'
+    compileAndInclude 'dcm4che.tool:dcm4che-tool-dcmecho:2.0.29'
+    compileAndInclude 'dcm4che.tool:dcm4che-tool-dcmqr:2.0.29'
+    compileAndInclude "dcm4che:dcm4che-core:2.0.29"
+    compileAndInclude 'dcm4che:dcm4che-imageio:2.0.29'
+    compileAndInclude 'dcm4che:dcm4che-imageio-rle:2.0.29'
+    compileAndInclude "dcm4che:dcm4che-net:2.0.29"
+    compileAndInclude 'org.apache.activemq:activemq-core:5.7.0'
+    compileAndInclude 'org.apache.geronimo.specs:geronimo-jms_1.1_spec:1.1.1'
+    compileAndInclude 'org.apache.geronimo.specs:geronimo-j2ee-management_1.1_spec:1.0.1'
+    compileAndInclude 'org.apache.activemq:kahadb:5.7.0'
+    testCompile group: 'junit', name: 'junit', version: "${vJunit}"
+    testCompile "org.springframework:spring-test"
+    testCompile "org.nrg.xdat:core"
+}
+
+task fatJar(type: Jar) {
+    zip64 true
+    classifier = "fat"
+    from {
+        configurations.compileAndInclude.collect { it.isDirectory() ? it : zipTree(it) }
+    } {
+        exclude "META-INF/*.SF"
+        exclude "META-INF/*.DSA"
+        exclude "META-INF/*.RSA"
+    }
+    with jar
+}
