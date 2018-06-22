@@ -7,7 +7,9 @@ import org.nrg.framework.annotations.XnatPlugin;
 import org.nrg.xnat.initialization.RootConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
@@ -19,9 +21,10 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
         log4jPropertiesFile = "META-INF/resources/log4j.properties",
         version = ""
 )
-@ComponentScan({"org.nrg.xnat.restclient"})
+@ComponentScan(value = "org.nrg.xnat.restclient", excludeFilters = @Filter(type = FilterType.REGEX, pattern = ".*TestConfig.*", value = {}))
 @Import({RootConfig.class})
 public class RestClientConfig {
+
     @Bean
     public Module guavaModule() {
         return new GuavaModule();
