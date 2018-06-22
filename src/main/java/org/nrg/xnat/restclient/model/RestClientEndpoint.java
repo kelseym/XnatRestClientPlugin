@@ -7,10 +7,11 @@ import com.google.auto.value.AutoValue;
 import org.springframework.http.HttpHeaders;
 
 import javax.annotation.Nullable;
+import java.util.Map;
 
 @AutoValue
 @JsonInclude(JsonInclude.Include.ALWAYS)
-public abstract class InternalRestEndpoint {
+public abstract class RestClientEndpoint {
 
     @Nullable @JsonProperty("id")           public abstract Long id();
     @JsonProperty("name")                   public abstract String name();
@@ -19,15 +20,20 @@ public abstract class InternalRestEndpoint {
     @JsonProperty("method")                 public abstract Method method();
     @JsonProperty("url")                    public abstract String url();
     @Nullable @JsonProperty("headers")      public abstract HttpHeaders httpHeaders();
+    @Nullable @JsonProperty("request-body") public abstract String requestBody();
+    @Nullable @JsonProperty("parameters")   public abstract Map<String, String> parameters();
+    @Nullable @JsonProperty("is-valid")     public abstract Boolean isValid();
 
     @JsonCreator
-    public static InternalRestEndpoint create(@Nullable @JsonProperty("id")         Long id,
-                                              @JsonProperty("name")                 String name,
-                                              @Nullable @JsonProperty("project-id") String projectId,
-                                              @Nullable @JsonProperty("active")     Boolean active,
-                                              @JsonProperty("method")               Method method,
-                                              @JsonProperty("url")                  String url,
-                                              @Nullable @JsonProperty("headers")    HttpHeaders httpHeaders) {
+    public static RestClientEndpoint create(@Nullable @JsonProperty("id")           Long id,
+                                            @JsonProperty("name")                   String name,
+                                            @Nullable @JsonProperty("project-id")   String projectId,
+                                            @Nullable @JsonProperty("active")       Boolean active,
+                                            @JsonProperty("method")                 Method method,
+                                            @JsonProperty("url")                    String url,
+                                            @Nullable @JsonProperty("headers")      HttpHeaders httpHeaders,
+                                            @Nullable @JsonProperty("request-body") String requestBody,
+                                            @Nullable @JsonProperty("parameteres")  Map<String, String> parameters) {
         return builder()
                 .id(id)
                 .name(name)
@@ -36,16 +42,16 @@ public abstract class InternalRestEndpoint {
                 .method(method)
                 .url(url)
                 .httpHeaders(httpHeaders)
+                .requestBody(requestBody)
+                .parameters(parameters)
                 .build();
     }
 
-    public static InternalRestEndpoint.Builder builder() { return new AutoValue_InternalRestEndpoint.Builder(); }
-
-
-
+    public static RestClientEndpoint.Builder builder() { return new AutoValue_RestClientEndpoint.Builder(); }
 
 
     public enum Method {GET, POST, PUT, DELETE}
+
 
     @AutoValue.Builder
     public abstract static class Builder {
@@ -63,6 +69,12 @@ public abstract class InternalRestEndpoint {
 
         public abstract Builder httpHeaders(HttpHeaders httpHeaders);
 
-        public abstract InternalRestEndpoint build();
+        public abstract Builder requestBody(String requestBody);
+
+        public abstract Builder parameters(Map<String,String> parameters);
+
+        public abstract Builder isValid(Boolean isValid);
+
+        public abstract RestClientEndpoint build();
     }
 }

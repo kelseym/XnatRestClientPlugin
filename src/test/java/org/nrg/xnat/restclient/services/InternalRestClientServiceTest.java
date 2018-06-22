@@ -6,7 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.nrg.xnat.restclient.config.InternalRestClientTestConfig;
+import org.nrg.xnat.restclient.config.RestClientTestConfig;
+import org.nrg.xnat.restclient.model.RestClientEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,7 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = InternalRestClientTestConfig.class)
+@ContextConfiguration(classes = RestClientTestConfig.class)
 public class InternalRestClientServiceTest {
     private static final Logger log = LoggerFactory.getLogger(InternalRestClientServiceTest.class);
 
@@ -60,15 +61,28 @@ public class InternalRestClientServiceTest {
 
     @Test
     public void testPostTransaction() throws Throwable {
+
         String url = "https://jsonplaceholder.typicode.com/posts";
-        String post = "{\n" +
+
+        String postBody = "{\n" +
                 "  \"userId\": 1,\n" +
                 "  \"title\": \"sunt aut facere repellat provident occaecati excepturi optio reprehenderit\",\n" +
-                "  \"body\": \"quia et suscipit\\nsuscipit recusandae consequuntur expedita et cum\\nreprehenderit molestiae ut ut quas totam\\nnostrum rerum est autem sunt rem eveniet architecto\"\n" +
+                "  \"requestBody\": \"quia et suscipit\\nsuscipit recusandae consequuntur expedita et cum\\nreprehenderit molestiae ut ut quas totam\\nnostrum rerum est autem sunt rem eveniet architecto\"\n" +
                 "}";
 
+        RestClientEndpoint restEndpoint = RestClientEndpoint.builder()
+                                                            .id(1L)
+                                                            .name("Test POST")
+                                                            .projectId("TestProjectID")
+                                                            .active(true)
+                                                            .method(RestClientEndpoint.Method.POST)
+                                                            .url(url)
+                                                            .body(postBody)
+                                                            .build();
+
+
         RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> postResponse = restTemplate.postForEntity(url, post, String.class);
+        ResponseEntity<String> postResponse = restTemplate.postForEntity(url, postBody, String.class);
         System.out.println("Response for Post Request: " + postResponse.getBody());
 
     }

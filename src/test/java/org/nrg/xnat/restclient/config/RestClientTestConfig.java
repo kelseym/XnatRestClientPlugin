@@ -5,5 +5,5 @@ import org.springframework.context.annotation.Import;
 
 @Configuration
 @Import({HibernateConfig.class, ObjectMapperConfig.class})
-public class InternalRestClientTestConfig {
+public class RestClientTestConfig {
 }
